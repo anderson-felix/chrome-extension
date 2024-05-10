@@ -1,17 +1,5 @@
 /* eslint-disable no-undef */
-// Copyright 2023 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+let folder = 'first-panel';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -30,6 +18,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender) => {
+
   // The callback for runtime.onMessage must return falsy if we're not sending a response
   (async () => {
     if (message.type === 'open_side_panel') {
@@ -37,9 +26,48 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       await chrome.sidePanel.open({ tabId: sender.tab.id });
       await chrome.sidePanel.setOptions({
         tabId: sender.tab.id,
-        path: 'first-panel/index.html',
+        path: `${folder}/index.html`,
         enabled: true
       });
+
     }
   })();
 });
+
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+
+
+  if (tab.title.match(/(tv|smart)/gi))
+    chrome.sidePanel.setOptions({
+      tabId: tabId,
+      path: `tv-smart/index.html`,
+      enabled: true
+    });
+
+  if (tab.title.match(/(mic|audio|som|microfone)/gi))
+    chrome.sidePanel.setOptions({
+      tabId: tabId,
+      path: `mic/index.html`,
+      enabled: true
+    });
+
+  if (tab.title.match(/(plantas|planta|jardim|verde)/gi))
+    chrome.sidePanel.setOptions({
+      tabId: tabId,
+      path: `plant/garden-index.html`,
+      enabled: true
+    });
+
+
+});
+
+chrome.identity.getProfileUserInfo(function (userInfo) {
+  console.log(`Nome de usuário`, userInfo.username);
+  console.log(`Email`, userInfo.email);
+  console.log('userInfo: ', JSON.stringify({ userInfo }, null, 4));
+});
+
+chrome.history.search({ text: '', maxResults: 100 }, function (historyItems) {
+  console.log('historyItems: ', historyItems);
+});
+
